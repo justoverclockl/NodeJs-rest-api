@@ -15,7 +15,9 @@ router.post('/login', async (req, res) => {
 
     // utilizziamo un token per sapere se siamo loggati o no
     const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET)
-    res.header('auth-token', token).send(token)
+    res.header('auth-token', token).send({
+        token: token,
+    })
 })
 
 module.exports = router

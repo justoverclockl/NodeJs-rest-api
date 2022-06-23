@@ -5,10 +5,32 @@ const Users = require('../models/users')
 
 router.get('/users', async (req, res) => {
     try {
-        const users = await Users.find()
+        // tornando tutto l'oggetto, torniamo anche la password criptata, SCONSIGLIATO
+        // da documentazione: 0 significa escludi, 1 significa mostra
+        const users = await Users.find().select({
+            _id: 1,
+            name: 1,
+            email: 1,
+            registrationDate: 1,
+        })
         res.status(200).json(users)
     } catch (err) {
         res.status(404).send('Error: ' + err)
+    }
+})
+
+router.get('/users/search/:name', async (req, res) => {
+    try {
+        const user = await Users.findOne({ name: req.params.name })
+        if (!user)
+            return res.status(400).send('Non esiste un utente con questo nome')
+        res.status(200).send({
+            name: user.name,
+            email: user.email,
+            registrationDate: user.registrationDate,
+        })
+    } catch (err) {
+        res.status(400).send('Errore' + err)
     }
 })
 
@@ -47,7 +69,12 @@ router.post('/users', async (req, res) => {
         const registeredUser = await user.save()
         res.status(200).json({
             message: 'Utente salvato con successo nel database',
-            payload: registeredUser,
+            payload: {
+                id: registeredUser.id,
+                name: registeredUser.name,
+                email: registeredUser.email,
+                registrationDate: registeredUser.registrationDate,
+            },
         })
     } catch (err) {
         res.status(400).send('Errore ' + err.message)

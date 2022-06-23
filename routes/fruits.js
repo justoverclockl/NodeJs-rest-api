@@ -11,8 +11,21 @@ router.get('/fruits', async (req, res) => {
     }
 })
 
+router.get('/fruits/search/:name', async (req, res) => {
+    const fruitExist = await Fruits.findOne({ name: req.params.name })
+    if (!fruitExist)
+        return res.status(400).send('Non esiste un frutto con questo nome')
+
+    try {
+        const fruit = await Fruits.findOne(fruitExist)
+        res.status(200).send(fruit)
+    } catch (err) {
+        res.status(400).send('Errore' + err)
+    }
+})
+
 router.get('/fruits/:id', async (req, res) => {
-    const fruitExist = await Fruits.findOne({ name: req.body.name })
+    const fruitExist = await Fruits.findOne({ _id: req.params.id })
     if (!fruitExist)
         return res.status(400).send('Non esiste un frutto con questo ID')
 
@@ -21,6 +34,24 @@ router.get('/fruits/:id', async (req, res) => {
         res.status(200).send(fruit)
     } catch (err) {
         res.status(400).send('Errore: ' + err)
+    }
+})
+
+router.patch('/fruits/:id', async (req, res) => {
+    const fruit = await Fruits.findById(req.params.id)
+    if (!fruit)
+        return res.status(400).send('Non esiste un frutto con questo ID')
+
+    try {
+        const id = req.params.id
+        const updatedData = req.body
+        const options = { new: true }
+
+        const result = await Fruits.findByIdAndUpdate(id, updatedData, options)
+
+        res.send(result)
+    } catch (error) {
+        res.status(400).json({ message: error.message })
     }
 })
 
@@ -49,7 +80,7 @@ router.post('/fruits', async (req, res) => {
 
     const fruit = new Fruits({
         genus: req.body.genus,
-        name: req.body.genus,
+        name: req.body.name,
         image: req.body.image,
         price: req.body.price,
         family: req.body.family,
