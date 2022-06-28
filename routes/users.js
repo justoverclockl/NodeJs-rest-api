@@ -25,8 +25,13 @@ router.get('/users/search/:name', async (req, res) => {
         const user = await Users.find({
             name: {
                 $regex: '.*' + query + '.*',
-                $options: 'i'
-            }
+                $options: 'i',
+            },
+        }).select({
+            _id: 1,
+            name: 1,
+            email: 1,
+            registrationDate: 1,
         })
         if (!user || user.length <= 0)
             return res.status(400).send('Non esiste un utente con questo nome')
