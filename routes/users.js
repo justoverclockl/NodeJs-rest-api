@@ -21,14 +21,16 @@ router.get('/users', async (req, res) => {
 
 router.get('/users/search/:name', async (req, res) => {
     try {
-        const user = await Users.findOne({ name: req.params.name })
-        if (!user)
-            return res.status(400).send('Non esiste un utente con questo nome')
-        res.status(200).send({
-            name: user.name,
-            email: user.email,
-            registrationDate: user.registrationDate,
+        const query = req.params.name
+        const user = await Users.find({
+            name: {
+                $regex: '.*' + query + '.*',
+                $options: 'i'
+            }
         })
+        if (!user || user.length <= 0)
+            return res.status(400).send('Non esiste un utente con questo nome')
+        res.status(200).send(user)
     } catch (err) {
         res.status(400).send('Errore' + err)
     }
